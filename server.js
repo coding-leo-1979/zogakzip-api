@@ -13,19 +13,7 @@ const app = express();
 connectDB();
 
 // CORS 설정
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || ['http://localhost:3004', 'http://localhost:3001'].includes(origin)) {
-      callback(null, true); // 허용된 도메인에서는 CORS 허용
-    } else {
-      callback(null, true); // 전체 도메인 허용
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
+app.use(cors());
 
 // JSON 파싱 미들웨어
 app.use(express.json());
