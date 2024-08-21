@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
@@ -16,9 +14,11 @@ connectDB();
 
 // CORS 설정
 app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: '*', // 모든 출처를 허용. 필요에 따라 특정 도메인만 허용하도록 변경 가능.
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // 'OPTIONS' 추가
+  allowedHeaders: ['Content-Type', 'Authorization'], // 허용할 헤더
+  preflightContinue: false, // 프리플라이트 요청 후 바로 응답
+  optionsSuccessStatus: 204 // 프리플라이트 요청에 대한 성공 상태 코드
 }));
 
 // JSON 파싱 미들웨어
