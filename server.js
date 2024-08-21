@@ -16,7 +16,7 @@ connectDB();
 
 // CORS 설정
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*', // 환경 변수로 CORS 출처를 설정하거나 모든 출처 허용
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
