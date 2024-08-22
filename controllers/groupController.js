@@ -309,7 +309,7 @@ exports.createPost = async (req, res) => {
             tags,
             location,
             moment,
-            isPublic
+            isPublic,
         });
 
         const savedPost = await newPost.save();
@@ -327,7 +327,7 @@ exports.createPost = async (req, res) => {
             isPublic: savedPost.isPublic,
             likeCount: savedPost.likeCount,
             commentCount: savedPost.commentCount,
-            createdAt: savedPost.createdAt
+            createdAt: savedPost.createdAt,
         });
     } catch (err) {
         console.error(err);

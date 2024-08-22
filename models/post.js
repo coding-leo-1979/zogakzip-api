@@ -17,7 +17,8 @@ const postSchema = new mongoose.Schema({
     isPublic: { type: Boolean, default: true },
     likeCount: { type: Number, default: 0 },
     commentCount: { type: Number, default: 0 },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    comments: [Number]
 });
 
 // Auto-increment 설정

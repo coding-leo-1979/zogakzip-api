@@ -1,7 +1,8 @@
 // controllers/postController.js
 
-const Post = require('../models/post');
 const Group = require('../models/group');
+const Post = require('../models/post');
+const Comment = require('../models/comment');
 
 // 게시글 수정
 exports.updatePost = async (req, res) => {
@@ -174,7 +175,7 @@ exports.likePost = async (req, res) => {
 };
 
 // 게시글 공개 여부 확인
-exports.getPostVisibility = async (req, res) => {
+exports.checkPostVisibility = async (req, res) => {
     const { postId } = req.params;
 
     try {
@@ -193,6 +194,81 @@ exports.getPostVisibility = async (req, res) => {
         });
     } catch (err) {
         console.error(err);
+        res.status(400).json({ message: '잘못된 요청입니다' });
+    }
+};
+
+// 댓글 등록
+exports.addComment = async (req, res) => {
+    const { postId } = req.params;
+    const { nickname, content, password } = req.body;
+
+    try {
+        // 게시글 찾기
+        const post = await Post.findOne({ id: postId });
+        if (!post) {
+            return res.status(404).json({ message: '게시글이 존재하지 않습니다' });
+        }
+
+        // 댓글 생성
+        const newComment = new Comment({ nickname, content, password });
+        const savedComment = await newComment.save();
+
+        // 게시글에 댓글 ID 추가
+        post.comments.push(savedComment.commentId);
+        await post.save();
+
+        // 성공 응답
+        res.status(200).json({
+            id: savedComment.commentId,
+            nickname: savedComment.nickname,
+            content: savedComment.content,
+            createdAt: savedComment.createdAt
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ message: '잘못된 요청입니다' });
+    }
+};
+
+// 댓글 목록 조회
+exports.getComments = async (req, res) => {
+    const { postId } = req.params;
+    const { page = 1, pageSize = 10 } = req.query;
+
+    try {
+        // 게시글 찾기
+        const post = await Post.findOne({ id: postId });
+        if (!post) {
+            return res.status(404).json({ message: '게시글이 존재하지 않습니다' });
+        }
+
+        // 댓글 목록 조회
+        const comments = await Comment.find({ commentId: { $in: post.comments } }) // post.commentIds -> post.comments로 변경
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * pageSize)
+            .limit(parseInt(pageSize));
+
+        const totalComments = await Comment.countDocuments({ commentId: { $in: post.comments } }); // post.commentIds -> post.comments로 변경
+        const totalPages = Math.ceil(totalComments / pageSize);
+
+        // 데이터 형식 변환
+        const formattedComments = comments.map(comment => ({
+            id: comment.commentId,
+            nickname: comment.nickname,
+            content: comment.content,
+            createdAt: comment.createdAt
+        }));
+
+        // 성공 응답
+        res.status(200).json({
+            currentPage: parseInt(page),
+            totalPages,
+            totalItemCount: totalComments,
+            data: formattedComments
+        });
+    } catch (error) {
+        console.error(error);
         res.status(400).json({ message: '잘못된 요청입니다' });
     }
 };

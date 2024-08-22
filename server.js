@@ -1,8 +1,11 @@
+// server.js
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const groupRoutes = require('./routes/groupRoutes');
 const postRoutes = require('./routes/postRoutes');
+const commentRoutes = require('./routes/commentRoutes');
 
 // 환경 변수 설정
 require('dotenv').config();
@@ -30,6 +33,7 @@ app.use(express.json());
 // 그룹 라우트 설정
 app.use('/api', groupRoutes);
 app.use('/api', postRoutes);
+app.use('/api', commentRoutes);
 
 // 정적 파일 서빙 (프론트엔드와 함께 배포할 때 필요)
 if (process.env.NODE_ENV === 'production') {
