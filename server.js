@@ -1,8 +1,10 @@
-// server.js
-
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
 const groupRoutes = require('./routes/groupRoutes');
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
@@ -17,18 +19,37 @@ connectDB();
 
 // CORS 설정
 app.use(cors());
-/*
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
-*/
 
 // JSON 파싱 미들웨어
 app.use(express.json());
+
+// 업로드 디렉토리 확인 및 생성
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+// Multer 설정
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+const upload = multer({ storage: storage });
+
+// 이미지 업로드 라우트 추가
+app.post('/api/image', upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: '이미지 업로드 실패' });
+    }
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    res.status(200).json({ imageUrl });
+});
+
+app.use('/uploads', express.static(uploadDir));
 
 // 그룹 라우트 설정
 app.use('/api', groupRoutes);
