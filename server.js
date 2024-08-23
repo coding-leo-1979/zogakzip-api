@@ -1,9 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 
 const groupRoutes = require('./routes/groupRoutes');
 const postRoutes = require('./routes/postRoutes');
@@ -11,6 +12,25 @@ const commentRoutes = require('./routes/commentRoutes');
 
 // 환경 변수 설정
 require('dotenv').config();
+
+// Cloudinary 설정
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Multer-Storage-Cloudinary 설정
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'uploads', // Cloudinary에서 이미지를 저장할 폴더 이름
+    format: async (req, file) => 'png', // 파일 포맷 (예: 'jpeg', 'png')
+    public_id: (req, file) => file.originalname, // 파일 이름
+  },
+});
+
+const upload = multer({ storage });
 
 const app = express();
 
@@ -23,38 +43,19 @@ app.use(cors());
 // JSON 파싱 미들웨어
 app.use(express.json());
 
-// 업로드 디렉토리 확인 및 생성
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
-
-// Multer 설정
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-const upload = multer({ storage: storage });
-
-// 이미지 업로드 라우트 추가
-app.post('/api/image', upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ message: '이미지 업로드 실패' });
-    }
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-    res.status(200).json({ imageUrl });
-});
-
-app.use('/uploads', express.static(uploadDir));
-
 // 그룹 라우트 설정
 app.use('/api', groupRoutes);
 app.use('/api', postRoutes);
 app.use('/api', commentRoutes);
+
+// 이미지 업로드 및 URL 생성 라우트
+app.post('/api/image', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: '이미지 업로드 실패' });
+  }
+  const imageUrl = req.file.path; // Cloudinary에서 제공한 이미지 URL
+  res.status(200).json({ imageUrl });
+});
 
 // 정적 파일 서빙 (프론트엔드와 함께 배포할 때 필요)
 if (process.env.NODE_ENV === 'production') {
