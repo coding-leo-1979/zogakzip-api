@@ -69,11 +69,20 @@ exports.getGroups = async (req, res) => {
 
         // 필터링 조건
         const filter = {};
+
         if (keyword) {
             filter.name = { $regex: keyword, $options: 'i' };
         }
-        if (typeof isPublic === 'boolean') {
-            filter.isPublic = isPublic;
+
+        // `isPublic`이 파라미터로 넘어오지 않은 경우: true인 그룹만 필터링
+        if (isPublic === undefined) {
+            filter.isPublic = true;
+        } else if (isPublic === 'true') {
+            // `isPublic`이 true로 넘어온 경우: true인 그룹만 필터링
+            filter.isPublic = true;
+        } else if (isPublic === 'false') {
+            // `isPublic`이 false로 넘어온 경우: false인 그룹만 필터링
+            filter.isPublic = false;
         }
 
         // 데이터 조회
