@@ -371,11 +371,14 @@ exports.getPosts = async (req, res) => {
 
         // 게시글 필터링 조건
         const filter = { groupId };
+
         if (keyword) {
             filter.title = { $regex: keyword, $options: 'i' };
         }
-        if (typeof isPublic === 'boolean') {
-            filter.isPublic = isPublic;
+        if (isPublic === 'true') {
+            filter.isPublic = true;
+        } else if (isPublic === 'false') {
+            filter.isPublic = false;
         }
 
         // 데이터 조회
