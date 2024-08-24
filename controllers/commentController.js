@@ -57,14 +57,23 @@ exports.deleteComment = async (req, res) => {
             return res.status(403).json({ message: '비밀번호가 틀렸습니다' });
         }
 
+        // 댓글이 속한 게시글에서 comments 배열에서 commentId 삭제 및 commentCount 업데이트
+        const post = await Post.findOneAndUpdate(
+            { comments: commentId },
+            { $pull: { comments: commentId } }, // comments 배열에서 commentId 제거
+            { new: true } // 업데이트된 문서를 반환
+        );
+
+        if (!post) {
+            return res.status(404).json({ message: '게시글을 찾을 수 없습니다' });
+        }
+
+        // 업데이트된 comments 배열의 길이를 commentCount에 반영
+        post.commentCount = post.comments.length;
+        await post.save();
+
         // 댓글 삭제
         await comment.deleteOne();
-
-        // 댓글이 속한 게시글에서 commentId 삭제
-        await Post.updateOne(
-            { comments: commentId },
-            { $pull: { comments: commentId } }
-        );
 
         // 성공 응답
         res.status(200).json({ message: '답글 삭제 성공' });

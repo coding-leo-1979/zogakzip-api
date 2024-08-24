@@ -76,6 +76,23 @@ exports.deletePost = async (req, res) => {
             return res.status(403).json({ message: "비밀번호가 틀렸습니다" });
         }
 
+        // 해당 그룹에서 posts 배열에서 postId 제거 및 postCount 업데이트
+        const group = await Group.findOneAndUpdate(
+            { groupId: post.groupId },
+            { 
+                $pull: { posts: postId }, // posts 배열에서 postId 제거
+            },
+            { new: true } // 업데이트된 문서를 반환
+        );
+
+        if (!group) {
+            return res.status(404).json({ message: '그룹을 찾을 수 없습니다' });
+        }
+
+        // 업데이트된 posts 배열의 길이를 postCount에 반영
+        group.postCount = group.posts.length;
+        await group.save();
+
         // 게시글 삭제
         await Post.findOneAndDelete({ id: postId });
 
@@ -216,6 +233,7 @@ exports.addComment = async (req, res) => {
 
         // 게시글에 댓글 ID 추가
         post.comments.push(savedComment.commentId);
+        post.commentCount = post.comments.length;
         await post.save();
 
         // 성공 응답

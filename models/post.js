@@ -16,8 +16,8 @@ const postSchema = new mongoose.Schema({
     moment: { type: Date, required: true },
     isPublic: { type: Boolean, default: true },
     likeCount: { type: Number, default: 0 },
-    commentCount: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
+    commentCount: { type: Number, default: 0 },
     comments: [Number]
 });
 

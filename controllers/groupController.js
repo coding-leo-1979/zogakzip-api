@@ -318,6 +318,10 @@ exports.createPost = async (req, res) => {
 
         const savedPost = await newPost.save();
 
+        group.posts.push(savedPost.id);
+        group.postCount = group.posts.length;
+        await group.save();
+
         res.status(200).json({
             id: savedPost.id,
             groupId: savedPost.groupId,

@@ -12,8 +12,9 @@ const GroupSchema = new mongoose.Schema({
     introduction: { type: String, required: true },
     likeCount: { type: Number, default: 0 },
     badges: { type: [String], default: [] },
-    postCount: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
+    postCount: { type: Number, default: 0},
+    posts: { type: [Number], default: [] }
 });
 
 // Auto-increment 설정
