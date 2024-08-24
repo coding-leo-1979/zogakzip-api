@@ -3,7 +3,7 @@
 const Group = require('../models/group');
 const Post = require('../models/post');
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // 그룹 등록
 exports.createGroup = async (req, res) => {

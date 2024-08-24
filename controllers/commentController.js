@@ -3,7 +3,7 @@
 const Comment = require('../models/comment');
 const Post = require('../models/post');
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // 댓글 수정
 exports.updateComment = async (req, res) => {

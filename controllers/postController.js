@@ -4,7 +4,7 @@ const Group = require('../models/group');
 const Post = require('../models/post');
 const Comment = require('../models/comment');
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // 게시글 수정
 exports.updatePost = async (req, res) => {
