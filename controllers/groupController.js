@@ -3,16 +3,21 @@
 const Group = require('../models/group');
 const Post = require('../models/post');
 
+const bcrypt = require('bcrypt');
+
 // 그룹 등록
 exports.createGroup = async (req, res) => {
     try {
         const { name, password, imageUrl, isPublic, introduction } = req.body;
 
+        // 비밀번호 해싱
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         // 그룹 생성
         const newGroup = new Group({
             // 사용자 입력 필드
             name,
-            password,
+            password: hashedPassword,
             imageUrl,
             isPublic,
             introduction,
@@ -124,8 +129,9 @@ exports.updateGroup = async (req, res) => {
             return res.status(404).json({ message: '존재하지 않습니다' });
         }
 
-        // 비밀번호 틀림
-        if (group.password !== password) {
+        // 비밀번호 확인 (해시된 비밀번호 비교)
+        const isPasswordMatch = await bcrypt.compare(password, group.password);
+        if (!isPasswordMatch) {
             return res.status(403).json({ message: '비밀번호가 틀렸습니다' });
         }
 
@@ -167,8 +173,9 @@ exports.deleteGroup = async (req, res) => {
             return res.status(404).json({ message: '존재하지 않습니다' });
         }
 
-        // 비밀번호 틀림
-        if (group.password !== password) {
+        // 비밀번호 확인 (해시된 비밀번호 비교)
+        const isPasswordMatch = await bcrypt.compare(password, group.password);
+        if (!isPasswordMatch) {
             return res.status(403).json({ message: '비밀번호가 틀렸습니다' });
         }
 
@@ -225,8 +232,9 @@ exports.verifyGroupPassword = async (req, res) => {
             return res.status(404).json({ message: '존재하지 않습니다' });
         }
 
-        // 비밀번호 확인
-        if (group.password !== password) {
+        // 비밀번호 확인 (해시된 비밀번호 비교)
+        const isPasswordMatch = await bcrypt.compare(password, group.password);
+        if (!isPasswordMatch) {
             return res.status(401).json({ message: '비밀번호가 틀렸습니다' });
         }
 
@@ -292,14 +300,20 @@ exports.createPost = async (req, res) => {
         const { groupId } = req.params;
         const { nickname, title, content, postPassword, groupPassword, imageUrl, tags, location, moment, isPublic } = req.body;
 
-        // 그룹 비밀번호 확인
+        // 그룹 찾기
         const group = await Group.findOne({ groupId });
         if (!group) {
             return res.status(404).json({ message: '그룹을 찾을 수 없습니다' });
         }
-        if (group.password !== groupPassword) {
+
+        // 그룹 비밀번호 확인 (해시된 비밀번호 비교)
+        const isGroupPasswordMatch = await bcrypt.compare(groupPassword, group.password);
+        if (!isGroupPasswordMatch) {
             return res.status(403).json({ message: '그룹 비밀번호가 틀렸습니다' });
         }
+
+        // 게시글 비밀번호 해싱
+        const hashedPostPassword = await bcrypt.hash(postPassword, 10);
 
         // 게시글 생성
         const newPost = new Post({
@@ -307,8 +321,8 @@ exports.createPost = async (req, res) => {
             nickname,
             title,
             content,
-            postPassword,
-            groupPassword,
+            postPassword: hashedPostPassword, // 해싱된 게시글 비밀번호 저장
+            groupPassword: group.password,    // 그룹 비밀번호는 필요 없으니 저장 안 함
             imageUrl,
             tags,
             location,
@@ -318,6 +332,7 @@ exports.createPost = async (req, res) => {
 
         const savedPost = await newPost.save();
 
+        // 그룹에 게시글 추가
         group.posts.push(savedPost.id);
         group.postCount = group.posts.length;
         await group.save();

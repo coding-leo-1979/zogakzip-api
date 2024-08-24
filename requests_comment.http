@@ -1,0 +1,30 @@
+### 댓글 등록
+POST http://localhost:5000/api/posts/14/comments
+Content-Type: application/json
+
+{
+  "nickname": "GUEST_Comment",
+  "content": "COMMENT TEST",
+  "password": "password"
+}
+
+### 댓글 목록 조회
+GET http://localhost:5000/api/posts/14/comments
+
+### 댓글 수정
+PUT http://localhost:5000/api/comments/5
+Content-Type: application/json
+
+{
+	"nickname": "GUEST_Comment",
+	"content": "UPDATE COMMENT",
+	"password": "password"
+}
+
+### 댓글 삭제
+DELETE http://localhost:5000/api/comments/5
+Content-Type: application/json
+
+{
+	"password": "password"
+}

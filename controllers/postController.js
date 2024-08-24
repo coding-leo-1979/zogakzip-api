@@ -4,6 +4,8 @@ const Group = require('../models/group');
 const Post = require('../models/post');
 const Comment = require('../models/comment');
 
+const bcrypt = require('bcrypt');
+
 // 게시글 수정
 exports.updatePost = async (req, res) => {
     const { postId } = req.params;
@@ -19,7 +21,8 @@ exports.updatePost = async (req, res) => {
         }
 
         // 게시글 비밀번호 확인
-        if (post.postPassword !== postPassword) {
+        const isPasswordMatch = await bcrypt.compare(postPassword, post.postPassword);
+        if (!isPasswordMatch) {
             return res.status(403).json({ message: '비밀번호가 틀렸습니다' });
         }
 
@@ -56,7 +59,6 @@ exports.updatePost = async (req, res) => {
         res.status(400).json({ message: '잘못된 요청입니다' });
     }
 };
-
 // 게시글 삭제
 exports.deletePost = async (req, res) => {
     try {
@@ -72,8 +74,9 @@ exports.deletePost = async (req, res) => {
         }
 
         // 비밀번호 확인
-        if (post.postPassword !== postPassword) {
-            return res.status(403).json({ message: "비밀번호가 틀렸습니다" });
+        const isPasswordMatch = await bcrypt.compare(postPassword, post.postPassword);
+        if (!isPasswordMatch) {
+            return res.status(403).json({ message: '비밀번호가 틀렸습니다' });
         }
 
         // 해당 그룹에서 posts 배열에서 postId 제거 및 postCount 업데이트
@@ -101,7 +104,6 @@ exports.deletePost = async (req, res) => {
         return res.status(400).json({ message: "잘못된 요청입니다" });
     }
 };
-
 // 게시글 상세 정보 조회
 exports.getPost = async (req, res) => {
     const { postId } = req.params;
@@ -136,7 +138,6 @@ exports.getPost = async (req, res) => {
         res.status(400).json({ message: '잘못된 요청입니다' });
     }
 };
-
 // 게시글 조회 권한 확인
 exports.verifyPostPassword = async (req, res) => {
     const { postId } = req.params;
@@ -152,7 +153,8 @@ exports.verifyPostPassword = async (req, res) => {
         }
 
         // 비밀번호 확인
-        if (post.postPassword !== password) {
+        const isPasswordMatch = await bcrypt.compare(password, post.postPassword);
+        if (!isPasswordMatch) {
             return res.status(401).json({ message: '비밀번호가 틀렸습니다' });
         }
 
@@ -163,7 +165,6 @@ exports.verifyPostPassword = async (req, res) => {
         res.status(400).json({ message: '잘못된 요청입니다' });
     }
 };
-
 // 게시글 공감하기
 exports.likePost = async (req, res) => {
     const { postId } = req.params;
@@ -190,7 +191,6 @@ exports.likePost = async (req, res) => {
         res.status(400).json({ message: '잘못된 요청입니다' });
     }
 };
-
 // 게시글 공개 여부 확인
 exports.checkPostVisibility = async (req, res) => {
     const { postId } = req.params;
@@ -214,7 +214,6 @@ exports.checkPostVisibility = async (req, res) => {
         res.status(400).json({ message: '잘못된 요청입니다' });
     }
 };
-
 // 댓글 등록
 exports.addComment = async (req, res) => {
     const { postId } = req.params;
@@ -227,8 +226,11 @@ exports.addComment = async (req, res) => {
             return res.status(404).json({ message: '게시글이 존재하지 않습니다' });
         }
 
+        // 비밀번호 해싱
+        const hashedPassword = await bcrypt.hash(password, 10); // 10은 saltRounds 값으로, 보안 강도를 설정합니다.
+
         // 댓글 생성
-        const newComment = new Comment({ nickname, content, password });
+        const newComment = new Comment({ nickname, content, password: hashedPassword });
         const savedComment = await newComment.save();
 
         // 게시글에 댓글 ID 추가
@@ -248,7 +250,6 @@ exports.addComment = async (req, res) => {
         res.status(400).json({ message: '잘못된 요청입니다' });
     }
 };
-
 // 댓글 목록 조회
 exports.getComments = async (req, res) => {
     const { postId } = req.params;

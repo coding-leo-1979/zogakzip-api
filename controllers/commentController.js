@@ -3,6 +3,8 @@
 const Comment = require('../models/comment');
 const Post = require('../models/post');
 
+const bcrypt = require('bcrypt');
+
 // 댓글 수정
 exports.updateComment = async (req, res) => {
     const { commentId } = req.params;
@@ -18,7 +20,8 @@ exports.updateComment = async (req, res) => {
         }
 
         // 비밀번호 확인
-        if (comment.password !== password) {
+        const isPasswordValid = await bcrypt.compare(password, comment.password);
+        if (!isPasswordValid) {
             return res.status(403).json({ message: '비밀번호가 틀렸습니다' });
         }
 
@@ -39,7 +42,6 @@ exports.updateComment = async (req, res) => {
         res.status(400).json({ message: '잘못된 요청입니다' });
     }
 };
-
 // 댓글 삭제
 exports.deleteComment = async (req, res) => {
     const { commentId } = req.params;
@@ -53,7 +55,8 @@ exports.deleteComment = async (req, res) => {
         }
 
         // 비밀번호 확인
-        if (comment.password !== password) {
+        const isPasswordValid = await bcrypt.compare(password, comment.password);
+        if (!isPasswordValid) {
             return res.status(403).json({ message: '비밀번호가 틀렸습니다' });
         }
 

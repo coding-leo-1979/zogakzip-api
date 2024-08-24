@@ -1,0 +1,94 @@
+### 그룹 등록
+POST https://zogakzip-api-gr4l.onrender.com/api/groups
+Content-Type: application/json
+
+{
+	"name": "OOTD",
+	"password": "password",
+	"imageUrl": "TEST",
+	"isPublic": true,
+	"introduction": "Outfit Of The Day"
+}
+
+### 그룹 등록
+POST http://localhost:5000/api/groups
+Content-Type: application/json
+
+{
+	"name": "OOTD",
+	"password": "password",
+	"imageUrl": "TEST",
+	"isPublic": true,
+	"introduction": "Outfit Of The Day"
+}
+
+### 그룹 목록 조회
+GET http://zogakzip-api-gr4l.onrender.com/api/groups
+
+### 그룹 목록 조회
+GET http://localhost:5000/api/groups
+
+### 그룹 수정
+PUT http://zogakzip-api-gr4l.onrender.com/api/groups/1
+Content-Type: application/json
+
+{
+	"name": "TEST",
+	"password": "TEST",
+	"imageUrl": "https://images.unsplash.com/photo-1596241913274-fd9f65e3a2b5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+	"isPublic": true,
+	"introduction": "test1 intro"
+}
+
+### 그룹 수정
+PUT http://localhost:5000/api/groups/16
+Content-Type: application/json
+
+{
+	"name": "TEST",
+	"password": "password",
+	"imageUrl": "https://images.unsplash.com/photo-1596241913274-fd9f65e3a2b5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+	"isPublic": true,
+	"introduction": "test1 intro"
+}
+
+### 그룹 삭제
+DELETE http://zogakzip-api-gr4l.onrender.com/api/groups/8
+Content-Type: application/json
+
+{
+  "password": "TEST"
+}
+
+### 그룹 삭제
+DELETE http://localhost:5000/api/groups/16
+Content-Type: application/json
+
+{
+  "password": "password"
+}
+
+### 그룹 상세 정보 조회
+GET http://zogakzip-api-gr4l.onrender.com/api/groups/1
+
+### 그룹 조회 권한 확인
+POST https://zogakzip-api-gr4l.onrender.com/api/groups/1/verify-password 
+Content-Type: application/json
+
+{
+	"password": "TEST"
+}
+
+### 그룹 조회 권한 확인
+POST http://localhost:5000/api/groups/17/verify-password 
+Content-Type: application/json
+
+{
+	"password": "password"
+}
+
+### 그룹 공감하기
+POST http://zogakzip-api-gr4l.onrender.com/api/groups/1/like
+
+### 그룹 공개 여부 확인
+GET http://zogakzip-api-gr4l.onrender.com/api/groups/1/is-public
